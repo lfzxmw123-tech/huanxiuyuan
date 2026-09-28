@@ -139,8 +139,11 @@
             function guide() { if (!playing || active >= clues.length) return; const clue = clues[active]; camera.position.lerp(new THREE.Vector3(clue.position.x, 2, clue.position.z - 3), .9); camera.lookAt(clue.position); controls.lookAt(clue.position); }
             $('enter').onclick = () => { $('intro').classList.add('hidden'); playing = true; controls.enabled = true; updateQuest(); };
             $('continue').onclick = () => { $('dialog').classList.remove('show'); if (active === 3) setTimeout(() => $('end').classList.add('show'), 350); else controls.enabled = true; };
-            $('restart').onclick = () => { if (active !== 3) return; location.reload(); };
-            $('restart').textContent = '重新开始本场';
+            $('restart').onclick = () => {
+                if (active !== 3) return;
+                location.assign('./huanxiu-time-slices.html?scene=venetian&stage=2');
+            };
+            $('restart').textContent = '进入第二场景';
             addEventListener('keydown', (event) => { if (event.key.toLowerCase() === 'e') collect(); if (event.key.toLowerCase() === 'f') guide(); });
             addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
             function animate() { requestAnimationFrame(animate); const t = performance.now() * .001; clues.forEach((clue, i) => { if (clue.visible) { clue.userData.glow.position.y = .35 + Math.sin(t * 2 + i) * .08; clue.userData.ring.rotation.z = t * .45; } }); controls.enabled && controls.update(clock.getDelta()); checkClue(); lcc && LCCRender.update(); renderer.render(scene, camera); }
