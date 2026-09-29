@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
@@ -137,38 +137,76 @@
             ];
             const clueData = secondScene ? secondClues : firstClues;
             const npc = new THREE.Group();
-            const robeMat = new THREE.MeshStandardMaterial({color: secondScene ? 0x344b58 : 0x293d32, roughness: .92});
-            const darkMat = new THREE.MeshStandardMaterial({color: 0x171c18, roughness: 1});
-            const skinMat = new THREE.MeshStandardMaterial({color: 0xe0ad87, roughness: .78});
-            const goldMat = new THREE.MeshStandardMaterial({color: 0xb58a43, metalness: .35, roughness: .65});
-            const npcBody = new THREE.Mesh(new THREE.CylinderGeometry(.32,.48,1.02,12), robeMat); npcBody.position.y = .78; npc.add(npcBody);
-            const npcCollar = new THREE.Mesh(new THREE.TorusGeometry(.17,.035,8,20), goldMat); npcCollar.rotation.x = Math.PI/2; npcCollar.position.y = 1.22; npc.add(npcCollar);
-            const npcBelt = new THREE.Mesh(new THREE.TorusGeometry(.39,.035,8,24), goldMat); npcBelt.rotation.x = Math.PI/2; npcBelt.position.y = .56; npc.add(npcBelt);
-            const sleeveL = new THREE.Mesh(new THREE.CylinderGeometry(.11,.15,.65,10), robeMat); sleeveL.rotation.z = -.25; sleeveL.position.set(-.39,.86,0); npc.add(sleeveL);
-            const sleeveR = sleeveL.clone(); sleeveR.rotation.z = .25; sleeveR.position.x = .39; npc.add(sleeveR);
-            const handL = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), skinMat); handL.position.set(-.48,.55,0); npc.add(handL);
-            const handR = handL.clone(); handR.position.x = .48; npc.add(handR);
-            const legL = new THREE.Mesh(new THREE.CylinderGeometry(.12,.14,.45,9), darkMat); legL.position.set(-.16,.22,0); npc.add(legL);
-            const legR = legL.clone(); legR.position.x = .16; npc.add(legR);
-            const shoeL = new THREE.Mesh(new THREE.SphereGeometry(.15,10,8), darkMat); shoeL.scale.set(1.2,.55,1.5); shoeL.position.set(-.16,.04,.08); npc.add(shoeL);
-            const shoeR = shoeL.clone(); shoeR.position.x = .16; npc.add(shoeR);
-            const npcHead = new THREE.Mesh(new THREE.SphereGeometry(.27,16,12), skinMat); npcHead.position.y = 1.48; npc.add(npcHead);
-            const beard = new THREE.Mesh(new THREE.ConeGeometry(.16,.28,8), darkMat); beard.position.set(0,1.3,.2); beard.rotation.x = Math.PI; npc.add(beard);
-            const hair = new THREE.Mesh(new THREE.SphereGeometry(.28,12,8), darkMat); hair.scale.set(1,.72,1); hair.position.set(0,1.62,0); npc.add(hair);
-            const eyeMat = new THREE.MeshBasicMaterial({color:0x5a3828});
-            [-.09,.09].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(.025,6,6),eyeMat);eye.position.set(x,1.51,.255);npc.add(eye);});
-            const browMat = new THREE.MeshBasicMaterial({color:0x6b4630});
-            [-.09,.09].forEach(x=>{const brow=new THREE.Mesh(new THREE.BoxGeometry(.07,.012,.018),browMat);brow.position.set(x,1.57,.255);brow.rotation.z=x<0?.12:-.12;npc.add(brow);});
-            const smile = new THREE.Mesh(new THREE.TorusGeometry(.065,.012,6,16,Math.PI), new THREE.MeshBasicMaterial({color:0x8b4d45})); smile.position.set(0,1.39,.26); smile.rotation.x=Math.PI/2; smile.rotation.z=Math.PI; npc.add(smile);
-            const cheekMat = new THREE.MeshBasicMaterial({color:0xe79b83,transparent:true,opacity:.55});
-            [-.15,.15].forEach(x=>{const cheek=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),cheekMat);cheek.position.set(x,1.42,.245);npc.add(cheek);});
-            const npcHat = new THREE.Mesh(new THREE.CylinderGeometry(.34,.42,.12,16), darkMat); npcHat.position.y = 1.78; npc.add(npcHat);
-            const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(.22,.27,.16,12), darkMat); hatTop.position.y = 1.91; npc.add(hatTop);
-            const lanternPost = new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.55,6), goldMat); lanternPost.position.set(.52,.72,.08); npc.add(lanternPost);
-            const npcLantern = new THREE.Mesh(new THREE.SphereGeometry(.13,12,10), new THREE.MeshBasicMaterial({color:0xffc56b})); npcLantern.position.set(.52,.45,.08); npc.add(npcLantern);
-            const lanternTop = new THREE.Mesh(new THREE.TorusGeometry(.13,.018,6,16), goldMat); lanternTop.rotation.x = Math.PI/2; lanternTop.position.set(.52,.6,.08); npc.add(lanternTop);
-            npc.position.set(0, 0, secondScene ? 4.8 : 4.8); scene.add(npc);
-            const npcLight = new THREE.PointLight(0xffc978, 1.8, 5); npcLight.position.set(.52, .85, .18); npc.add(npcLight);
+      npc.position.set(0, 0, secondScene ? 4.8 : 4.8);
+      function bodyPart(geometry, color, x, y, z) {
+        const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, roughness: .88 }));
+        mesh.position.set(x, y, z);
+        npc.add(mesh);
+        return mesh;
+      }
+      const fill = new THREE.HemisphereLight(0xb4c9d6, 0x53462c, 2.0);
+      scene.add(fill);
+      const rim = new THREE.DirectionalLight(0xdce9ff, 2.2);
+      rim.position.set(-3, 5, -2); scene.add(rim);
+      // 长衫轮廓与滚边：宽下摆、收腰和斜襟。
+      bodyPart(new THREE.CylinderGeometry(.22, .32, 1.02, 24), 0x485b50, 0, .88, 0).scale.z = .72;
+      bodyPart(new THREE.CylinderGeometry(.315, .325, .035, 24), 0x92917b, 0, .385, 0).scale.z = .72;
+      bodyPart(new THREE.CylinderGeometry(.235, .24, .08, 24), 0x303c36, 0, .91, 0).scale.z = .74;
+      const seam = bodyPart(new THREE.BoxGeometry(.018, .48, .016), 0xa09b7f, .075, 1.13, .173);
+      seam.rotation.z = -.27;
+      for (let i=0; i<4; i++) {
+        bodyPart(new THREE.BoxGeometry(.06, .012, .024), 0xb3a887, .04+i*.025, 1.31-i*.095, .185);
+      }
+      for (let i=0; i<7; i++) {
+        const angle = (i/6-.5)*2.3;
+        const fold = bodyPart(new THREE.CylinderGeometry(.009, .018, .43, 6), 0x3c4d43,
+          Math.sin(angle)*.265, .61, Math.cos(angle)*.198);
+        fold.rotation.z = -angle*.07;
+      }
+      bodyPart(new THREE.CylinderGeometry(.078, .085, .15, 16), 0xb99877, 0, 1.43, 0);
+      bodyPart(new THREE.CylinderGeometry(.11, .12, .09, 20, 1, true), 0xbbb49c, 0, 1.43, 0);
+      const head = new THREE.Group(); head.position.y = 1.6; npc.add(head);
+      function face(geometry, color, x, y, z) {
+        const part = bodyPart(geometry, color, x, y, z);
+        head.add(part);
+        return part;
+      }
+      face(new THREE.SphereGeometry(.18, 24, 18), 0xc7a780, 0, 0, 0).scale.set(.88, 1.12, .87);
+      face(new THREE.SphereGeometry(.034, 12, 8), 0xb8906b, 0, -.01, .151).scale.set(.6, 1.2, 1);
+      face(new THREE.BoxGeometry(.064, .009, .012), 0x70513f, 0, -.078, .14);
+      face(new THREE.SphereGeometry(.07, 16, 10), 0x96978b, 0, -.126, .117).scale.set(.8, .64, .3);
+      face(new THREE.CylinderGeometry(.195, .205, .09, 24), 0x313d38, 0, .16, 0);
+      face(new THREE.SphereGeometry(.193, 24, 12, 0, Math.PI*2, 0, Math.PI/2), 0x3c4940, 0, .20, 0).scale.y = .34;
+      face(new THREE.CylinderGeometry(.208, .208, .016, 24), 0x9c9175, 0, .124, 0);
+      for (const side of [-1, 1]) {
+        const sleeve = bodyPart(new THREE.CylinderGeometry(.105, .085, .52, 16), 0x506257, side*.29, 1.12, 0);
+        sleeve.rotation.z = side*.15;
+        bodyPart(new THREE.CylinderGeometry(.089, .09, .055, 16), 0xb4ad92, side*.329, .86, 0);
+        bodyPart(new THREE.SphereGeometry(.065, 16, 12), 0xc7a780, side*.33, .78, .015).scale.y = 1.4;
+        bodyPart(new THREE.CylinderGeometry(.07, .075, .32, 12), 0x383d35, side*.13, .23, 0);
+        bodyPart(new THREE.SphereGeometry(.105, 16, 12), 0x282e2b, side*.13, .07, .055).scale.set(.85, .62, 1.6);
+        bodyPart(new THREE.BoxGeometry(.17, .025, .27), 0x85816e, side*.13, .022, .055);
+        face(new THREE.SphereGeometry(.027, 12, 8), 0xb99877, side*.163, -.005, 0).scale.set(.55, 1.5, 1);
+        face(new THREE.SphereGeometry(.026, 12, 8), 0xe0d4bb, side*.061, .036, .14).scale.set(1, .5, .45);
+        face(new THREE.SphereGeometry(.012, 12, 8), 0x272c25, side*.061, .036, .152);
+        const brow = face(new THREE.BoxGeometry(.055, .012, .012), 0x626257, side*.061, .067, .143);
+        brow.rotation.z = side*.12;
+      }
+      const handle = bodyPart(new THREE.TorusGeometry(.095, .009, 8, 24, Math.PI), 0x796947, -.33, .64, .04);
+      const lantern = bodyPart(new THREE.CylinderGeometry(.105, .105, .23, 16), 0xffcb72, -.33, .50, .04);
+      lantern.material.emissive.setHex(0xff9f38); lantern.material.emissiveIntensity = .65;
+      for (const y of [.37, .63]) {
+        bodyPart(new THREE.CylinderGeometry(.125, .125, .035, 16), 0x655337, -.33, y, .04);
+      }
+      for (let i=0; i<8; i++) {
+        const angle = i*Math.PI/4;
+        bodyPart(new THREE.CylinderGeometry(.006, .006, .24, 6), 0x8f7246,
+          -.33+Math.sin(angle)*.107, .5, .04+Math.cos(angle)*.107);
+      }
+      bodyPart(new THREE.ConeGeometry(.025, .12, 8), 0xb88950, -.33, .29, .04);
+      const lanternLight = new THREE.PointLight(0xffb65a, .8, 2.5);
+      lanternLight.position.set(-.33, .55, .22); npc.add(lanternLight);
+      scene.add(npc);
             let npcTalking = false;
             let npcTaskAccepted = false;
             if (secondScene) {
@@ -224,3 +262,4 @@
         </script>
     </body>
 </html>
+
