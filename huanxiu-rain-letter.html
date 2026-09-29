@@ -569,6 +569,8 @@
       const lanternLight = new THREE.PointLight(0xffb65a, .8, 2.5);
       lanternLight.position.set(-.33, .55, .22); keeper.add(lanternLight);
       scene.add(keeper);
+      // 第一幕只保留老奶奶叙事角色，旧守园人模型不再显示。
+      keeper.visible = false;
       // 第一幕叙事角色：坐在躺椅上的老奶奶。
       const granny = new THREE.Group();
       granny.position.set(isVenetian ? 1.8 : 1.2, 0.2, isVenetian ? 5.6 : 4.2);
@@ -605,11 +607,11 @@
         inspecting = talking = true;
         c.enabled = false;
         $('note-small').textContent = '廊下 · 老奶奶的故事';
-        $('note-title').textContent = '她还记得那个年轻人';
+        $('note-title').textContent = ['雨夜里的年轻人', '灯罩下的旧照片', '没有锁的匣'][a];
         $('note-body').textContent = [
-          '老奶奶轻轻摇着躺椅，说起一个总在雨夜来园的年轻人：他每次都坐在廊下听故事，却从没等到那封信。按 F 前往，按 E 调查，再把它记入线索板。',
-          '这字迹，我认得。去看看熄灭的灯吧，灯座下也许还压着旧照片。按 F 前往下一条线索。',
-          '照片里的人曾在花窗前等了很久。门前那只未上锁的匣，会告诉你最后的事。按 F 去看看。'
+          '老奶奶轻轻摇着躺椅，讲起一个总在雨夜来园的年轻人。他第一次来时站在廊下，问的不是信在哪里，而是这座园子为什么总替人留一盏灯。那封没有寄出的信，就从这里开始。按 F 前往信封处，按 E 调查。',
+          '她说，年轻人后来把一张照片藏进灯罩：照片里，他和一个女孩站在花窗前，约好等雨停后一起离开。可是雨一直没有停，女孩只留下了半句话。按 F 前往熄灭的灯，按 E 调查。',
+          '老奶奶最后指向门边那只没有锁的匣。年轻人每次来都把当天听到的故事写进去，等那个人回来再读给她听。多年以后，匣子仍然没有锁，因为故事从来不是要藏起来，而是要等一个愿意继续听的人。按 F 前往未锁的匣，按 E 调查。'
         ][a];
         $('next').textContent = '继续调查';
         $('inspect').classList.add('show');
