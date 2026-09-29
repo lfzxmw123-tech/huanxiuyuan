@@ -570,7 +570,7 @@
       keeper.visible = false;
       // 第一幕叙事角色：坐在躺椅上的老奶奶。
       const granny = new THREE.Group();
-      granny.position.set(isVenetian ? 1.8 : 1.2, 0.2, isVenetian ? 5.6 : 4.2);
+      granny.position.set(0, 0.2, isVenetian ? 5.6 : 4.6);
       const chair = new THREE.Group();
       const wood = new THREE.MeshStandardMaterial({ color: 0x594436, roughness: .9 });
       const cushion = new THREE.MeshStandardMaterial({ color: 0x87715d, roughness: 1 });
@@ -582,6 +582,13 @@
       const grandmaBody = new THREE.Mesh(new THREE.CylinderGeometry(.25,.34,.68,12), new THREE.MeshStandardMaterial({color:0x705b63,roughness:.9})); grandmaBody.position.set(0,.98,.02); grandmaBody.rotation.x=-.25; granny.add(grandmaBody);
       const grandmaHead = new THREE.Mesh(new THREE.SphereGeometry(.22,14,10), new THREE.MeshStandardMaterial({color:0xd4a07b,roughness:.85})); grandmaHead.position.set(0,1.48,-.18); granny.add(grandmaHead);
       const grandmaHair = new THREE.Mesh(new THREE.SphereGeometry(.24,12,8), new THREE.MeshStandardMaterial({color:0xb7b5aa,roughness:1})); grandmaHair.scale.set(1,.8,1); grandmaHair.position.set(0,1.63,-.18); granny.add(grandmaHair);
+      const bun = new THREE.Mesh(new THREE.SphereGeometry(.14,12,8), new THREE.MeshStandardMaterial({color:0xa9aa9f,roughness:1})); bun.position.set(0,1.68,-.4); granny.add(bun);
+      const faceDetail = new THREE.MeshBasicMaterial({color:0x5a4439});
+      [-.075,.075].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(.018,8,6),faceDetail);eye.position.set(x,1.48,.035);granny.add(eye);});
+      const glasses=new THREE.Mesh(new THREE.TorusGeometry(.055,.009,6,16),new THREE.MeshBasicMaterial({color:0x8d7049})); glasses.position.set(-.075,1.49,.045); glasses.rotation.x=Math.PI/2; granny.add(glasses); const glasses2=glasses.clone(); glasses2.position.x=.075; granny.add(glasses2);
+      const nose=new THREE.Mesh(new THREE.ConeGeometry(.018,.06,6),new THREE.MeshStandardMaterial({color:0xc08b70})); nose.position.set(0,1.43,.07); nose.rotation.x=Math.PI/2; granny.add(nose);
+      const hand=new THREE.Mesh(new THREE.SphereGeometry(.07,10,8),new THREE.MeshStandardMaterial({color:0xd4a07b,roughness:.85})); hand.position.set(-.27,1.0,.12); granny.add(hand); const hand2=hand.clone(); hand2.position.x=.27; granny.add(hand2);
+      const blanket=new THREE.Mesh(new THREE.BoxGeometry(.5,.22,.62),new THREE.MeshStandardMaterial({color:0x776b70,roughness:1})); blanket.position.set(0,.62,.16); blanket.rotation.x=-.16; granny.add(blanket);
       const shawl = new THREE.Mesh(new THREE.BoxGeometry(.58,.08,.4), new THREE.MeshStandardMaterial({color:0x9a7f72,roughness:1})); shawl.position.set(0,1.2,-.03); shawl.rotation.x=-.2; granny.add(shawl);
       scene.add(granny);
       const grannyLight = new THREE.PointLight(0xffc27a,.55,2.8); grannyLight.position.set(.35,1.1,.25); granny.add(grannyLight);
@@ -744,6 +751,7 @@
         if (c.enabled) c.update(dt);
         keeperPrompt.style.display = play && !inspecting && a < items.length ? 'block' : 'none';
         keeperPrompt.textContent = nearKeeper() ? '老奶奶 · 按 E 听故事 / 点击交谈' : '老奶奶坐在躺椅上 · 按 G 前往';
+        granny.rotation.y = Math.atan2(cam.position.x - granny.position.x, cam.position.z - granny.position.z);
         granny.rotation.z = Math.sin(performance.now() * .0012) * .018;
         keeper.rotation.y = Math.atan2(cam.position.x-keeper.position.x, cam.position.z-keeper.position.z);
         head.position.y = 1.6 + Math.sin(performance.now()*.0015)*.012;
