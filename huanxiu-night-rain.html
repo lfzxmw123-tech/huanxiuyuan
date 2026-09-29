@@ -139,7 +139,7 @@
             const npc = new THREE.Group();
             const robeMat = new THREE.MeshStandardMaterial({color: secondScene ? 0x344b58 : 0x293d32, roughness: .92});
             const darkMat = new THREE.MeshStandardMaterial({color: 0x171c18, roughness: 1});
-            const skinMat = new THREE.MeshStandardMaterial({color: 0xc58f70, roughness: .85});
+            const skinMat = new THREE.MeshStandardMaterial({color: 0xe0ad87, roughness: .78});
             const goldMat = new THREE.MeshStandardMaterial({color: 0xb58a43, metalness: .35, roughness: .65});
             const npcBody = new THREE.Mesh(new THREE.CylinderGeometry(.32,.48,1.02,12), robeMat); npcBody.position.y = .78; npc.add(npcBody);
             const npcCollar = new THREE.Mesh(new THREE.TorusGeometry(.17,.035,8,20), goldMat); npcCollar.rotation.x = Math.PI/2; npcCollar.position.y = 1.22; npc.add(npcCollar);
@@ -155,15 +155,20 @@
             const npcHead = new THREE.Mesh(new THREE.SphereGeometry(.27,16,12), skinMat); npcHead.position.y = 1.48; npc.add(npcHead);
             const beard = new THREE.Mesh(new THREE.ConeGeometry(.16,.28,8), darkMat); beard.position.set(0,1.3,.2); beard.rotation.x = Math.PI; npc.add(beard);
             const hair = new THREE.Mesh(new THREE.SphereGeometry(.28,12,8), darkMat); hair.scale.set(1,.72,1); hair.position.set(0,1.62,0); npc.add(hair);
-            const eyeMat = new THREE.MeshBasicMaterial({color:0x211812});
+            const eyeMat = new THREE.MeshBasicMaterial({color:0x5a3828});
             [-.09,.09].forEach(x=>{const eye=new THREE.Mesh(new THREE.SphereGeometry(.025,6,6),eyeMat);eye.position.set(x,1.51,.255);npc.add(eye);});
+            const browMat = new THREE.MeshBasicMaterial({color:0x6b4630});
+            [-.09,.09].forEach(x=>{const brow=new THREE.Mesh(new THREE.BoxGeometry(.07,.012,.018),browMat);brow.position.set(x,1.57,.255);brow.rotation.z=x<0?.12:-.12;npc.add(brow);});
+            const smile = new THREE.Mesh(new THREE.TorusGeometry(.065,.012,6,16,Math.PI), new THREE.MeshBasicMaterial({color:0x8b4d45})); smile.position.set(0,1.39,.26); smile.rotation.x=Math.PI/2; smile.rotation.z=Math.PI; npc.add(smile);
+            const cheekMat = new THREE.MeshBasicMaterial({color:0xe79b83,transparent:true,opacity:.55});
+            [-.15,.15].forEach(x=>{const cheek=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),cheekMat);cheek.position.set(x,1.42,.245);npc.add(cheek);});
             const npcHat = new THREE.Mesh(new THREE.CylinderGeometry(.34,.42,.12,16), darkMat); npcHat.position.y = 1.78; npc.add(npcHat);
             const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(.22,.27,.16,12), darkMat); hatTop.position.y = 1.91; npc.add(hatTop);
             const lanternPost = new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.55,6), goldMat); lanternPost.position.set(.52,.72,.08); npc.add(lanternPost);
             const npcLantern = new THREE.Mesh(new THREE.SphereGeometry(.13,12,10), new THREE.MeshBasicMaterial({color:0xffc56b})); npcLantern.position.set(.52,.45,.08); npc.add(npcLantern);
             const lanternTop = new THREE.Mesh(new THREE.TorusGeometry(.13,.018,6,16), goldMat); lanternTop.rotation.x = Math.PI/2; lanternTop.position.set(.52,.6,.08); npc.add(lanternTop);
             npc.position.set(0, 0, secondScene ? 4.8 : 4.8); scene.add(npc);
-            const npcLight = new THREE.PointLight(0xffb45f, 1.2, 4); npcLight.position.set(.42, .9, .08); npc.add(npcLight);
+            const npcLight = new THREE.PointLight(0xffc978, 1.8, 5); npcLight.position.set(.52, .85, .18); npc.add(npcLight);
             let npcTalking = false;
             let npcTaskAccepted = false;
             if (secondScene) {
