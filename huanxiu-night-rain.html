@@ -48,6 +48,8 @@
             #prompt.visible { opacity: 1; }
             #npc-prompt { position: absolute; left: 50%; bottom: 82px; transform: translateX(-50%); padding: 8px 14px; border: 1px solid var(--line); background: rgba(13,17,11,.82); color: var(--gold); font-size: 12px; opacity: 0; transition: opacity .2s; }
             #npc-prompt.visible { opacity: 1; }
+            #npc-dialog { position: fixed; inset: 0; z-index: 12; display: grid; place-items: center; background: rgba(3,6,3,.42); }
+            #npc-dialog.hidden { display: none; }
             .controls { position: absolute; bottom: 25px; left: 32px; color: rgba(233,226,205,.66); font-size: 11px; line-height: 1.7; letter-spacing: .05em; text-shadow: 0 2px 6px #000; }
             kbd { border: 1px solid rgba(233,226,205,.35); padding: 1px 4px; margin: 0 1px; font-family: inherit; font-size: 10px; }
 
@@ -91,6 +93,7 @@
         <div id="loading"><div class="load-copy"><span class="seal">环秀</span><h2>园门将启</h2><p id="loading-text">正在唤醒园中旧影 · 0%</p><div class="load-line"><i id="loading-bar"></i></div></div></div>
         <div id="intro"><div class="chapter"><span class="year">一 场 园 林 的 夜 游</span><h2>雨落环秀，<br>一卷旧图未归。</h2><p>掌灯入园。沿着廊下、花窗与石径留下的微光，收回三枚印记；当最后一页归位，园子会告诉你它原本的名字。</p><button class="enter" id="enter">入园寻卷</button></div></div>
         <div id="dialog"><article class="paper"><span class="eyebrow" id="dialog-index">第一枚印记</span><h3 id="dialog-title"></h3><p id="dialog-text"></p><button id="continue">收进卷中</button></article></div>
+        <div id="npc-dialog" class="hidden"><article class="paper"><span class="eyebrow">守园人 · 夜雨任务</span><h3>先去廊下收回第一枚印记</h3><p>雨把旧卷的线索留在园中。跟着我标出的方向，前往廊下的发光印记，按 E 将它记录下来。</p><button id="accept-npc-task">接受任务并前往</button></article></div>
         <div id="end"><article class="paper"><span class="eyebrow" id="end-label">营造图已复</span><h3 id="end-title">园因人静，景为心生。</h3><p id="end-text">三枚印记归入旧卷。你所走过的并非一条路，而是园林借门、窗、廊与树影写下的一次转折。</p><button id="restart">进入第二场景</button></article></div>
 
         <script type="importmap">{"imports":{"three":"./examples/engine/three/three.module.js","three/addons/":"./examples/engine/three/jsm/"}}</script>
@@ -180,7 +183,8 @@
             function checkClue() { if (!playing || active >= clues.length) return; const clue = clues[active]; const distance = camera.position.distanceTo(clue.position); const canUse = distance < 3.1; current = canUse ? clue : null; $('crosshair').classList.toggle('active', canUse); $('prompt').classList.toggle('visible', canUse); $('prompt').textContent = canUse ? `按 E 记录 · ${clue.userData.title}` : ''; }
             function collect() { if (!current) return; const data = current.userData; if (data.found) return; data.found = true; current.visible = false; $('dialog-index').textContent = `第 ${active + 1} 枚印记`; $('dialog-title').textContent = data.title; $('dialog-text').textContent = data.body; $('dialog').classList.add('show'); controls.enabled = false; active++; updateQuest(); }
             function guide() { if (!playing || active >= clues.length) return; const clue = clues[active]; camera.position.lerp(new THREE.Vector3(clue.position.x, 2, clue.position.z - 3), .9); camera.lookAt(clue.position); controls.lookAt(clue.position); }
-            $('enter').onclick = () => { $('intro').classList.add('hidden'); playing = true; controls.enabled = true; updateQuest(); };
+            $('enter').onclick = () => { $('intro').classList.add('hidden'); playing = true; controls.enabled = false; updateQuest(); $('npc-dialog').classList.remove('hidden'); };
+            $('accept-npc-task').onclick = () => { $('npc-dialog').classList.add('hidden'); npcTaskAccepted = true; $('quest-title').textContent = `任务：${clueData[0].title}`; $('quest-text').textContent = '守园人已标出第一处印记，按 F 前往。'; controls.enabled = true; guide(); };
             $('continue').onclick = () => { $('dialog').classList.remove('show'); if (active === 3) setTimeout(() => $('end').classList.add('show'), 350); else controls.enabled = true; };
             $('restart').onclick = () => {
                 if (active !== 3) return;
