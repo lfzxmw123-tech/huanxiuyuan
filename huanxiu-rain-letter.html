@@ -597,14 +597,15 @@
       // 使用外部老奶奶模型替换程序化人物，保留原有躺椅和对话位置。
       granny.remove(chair);
       chair.position.copy(granny.position);
+      chair.visible = false;
       scene.add(chair);
       granny.visible = false;
       let grannyModel = null;
       new GLTFLoader().load('./the_old_lady.glb', (asset) => {
         grannyModel = asset.scene;
         grannyModel.position.copy(granny.position);
-        grannyModel.scale.setScalar(isVenetian ? .78 : .82);
-        grannyModel.rotation.y = Math.PI;
+        grannyModel.scale.setScalar(isVenetian ? 1.18 : 1.28);
+        grannyModel.rotation.y = 0;
         grannyModel.traverse((part) => { if (part.isMesh) { part.castShadow = true; part.receiveShadow = true; } });
         scene.add(grannyModel);
       }, undefined, (error) => console.warn('老奶奶模型载入失败，将继续使用躺椅占位。', error));
@@ -771,7 +772,7 @@
         keeperPrompt.textContent = nearKeeper() ? '老奶奶 · 按 E 听故事 / 点击交谈' : '老奶奶坐在躺椅上 · 按 G 前往';
         const grannyFacing = Math.atan2(cam.position.x - granny.position.x, cam.position.z - granny.position.z);
         granny.rotation.y = grannyFacing;
-        if (grannyModel) grannyModel.rotation.y = grannyFacing + Math.PI;
+        if (grannyModel) grannyModel.rotation.y = grannyFacing;
         granny.rotation.z = Math.sin(performance.now() * .0012) * .018;
         keeper.rotation.y = Math.atan2(cam.position.x-keeper.position.x, cam.position.z-keeper.position.z);
         head.position.y = 1.6 + Math.sin(performance.now()*.0015)*.012;
