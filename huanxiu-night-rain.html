@@ -46,6 +46,8 @@
 
             #prompt { position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); padding: 9px 16px; border: 1px solid var(--line); background: rgba(13, 17, 11, .78); color: var(--ink); font-size: 13px; letter-spacing: .08em; opacity: 0; transition: opacity .25s; text-align: center; }
             #prompt.visible { opacity: 1; }
+            #npc-prompt { position: absolute; left: 50%; bottom: 82px; transform: translateX(-50%); padding: 8px 14px; border: 1px solid var(--line); background: rgba(13,17,11,.82); color: var(--gold); font-size: 12px; opacity: 0; transition: opacity .2s; }
+            #npc-prompt.visible { opacity: 1; }
             .controls { position: absolute; bottom: 25px; left: 32px; color: rgba(233,226,205,.66); font-size: 11px; line-height: 1.7; letter-spacing: .05em; text-shadow: 0 2px 6px #000; }
             kbd { border: 1px solid rgba(233,226,205,.35); padding: 1px 4px; margin: 0 1px; font-family: inherit; font-size: 10px; }
 
@@ -82,7 +84,7 @@
             <div class="grain"></div><div class="vignette"></div>
             <header class="masthead"><span class="seal">环秀</span><div><h1>夜雨寻卷</h1><p>HUANXIU GARDEN · A WALKING TALE</p></div></header>
             <section class="quest"><span class="eyebrow">今夜所求</span><h2 id="quest-title">未启的园林图</h2><p id="quest-text">循园中残留的三道印记，寻回失落的营造图。</p><div class="progress"><i id="progress-bar"></i></div></section>
-            <div id="crosshair"></div><div id="prompt"></div>
+            <div id="crosshair"></div><div id="prompt"></div><div id="npc-prompt">按 G 与守园人交谈</div>
             <div class="controls"><kbd>W A S D</kbd> 游园　<kbd>鼠标拖动</kbd> 取景<br><kbd>E</kbd> 记录印记　<kbd>F</kbd> 寻路提示</div>
         </div>
 
@@ -131,6 +133,14 @@
                 { title: '卷尾的归路', body: '最后一笔终于清晰：从环秀园走到这里，寻找的始终是同一条归路。两处风景在卷尾合成一幅完整的图。', pos: [5.2, 2.0, 15], color: 0xc58362 }
             ];
             const clueData = secondScene ? secondClues : firstClues;
+            const npc = new THREE.Group();
+            const npcBody = new THREE.Mesh(new THREE.CylinderGeometry(.28,.38,.9,8), new THREE.MeshStandardMaterial({color: secondScene ? 0x344b58 : 0x293d32, roughness: .9})); npcBody.position.y = .75; npc.add(npcBody);
+            const npcHead = new THREE.Mesh(new THREE.SphereGeometry(.25,12,8), new THREE.MeshStandardMaterial({color: 0xc58f70, roughness: .85})); npcHead.position.y = 1.45; npc.add(npcHead);
+            const npcHat = new THREE.Mesh(new THREE.CylinderGeometry(.34,.42,.12,12), new THREE.MeshStandardMaterial({color: 0x171c18, roughness: 1})); npcHat.position.y = 1.72; npc.add(npcHat);
+            const npcLantern = new THREE.Mesh(new THREE.SphereGeometry(.12,8,8), new THREE.MeshBasicMaterial({color: 0xffc56b})); npcLantern.position.set(.42,.8,.08); npc.add(npcLantern);
+            npc.position.set(secondScene ? 2.5 : -2.5, 0, secondScene ? 8 : 7); scene.add(npc);
+            const npcLight = new THREE.PointLight(0xffb45f, 1.2, 4); npcLight.position.set(.42, .9, .08); npc.add(npcLight);
+            let npcTalking = false;
             if (secondScene) {
                 document.querySelector('.masthead h1').textContent = '夜雨寻卷 · 第二场景';
                 document.querySelector('.masthead p').textContent = 'THE VENETIAN · A WALKING TALE';
@@ -143,6 +153,7 @@
                 $('end-text').textContent = '异园的三处回声已经写入卷尾。环秀园与水城的景色在此相接，夜雨寻卷的故事至此完成。';
                 $('restart').textContent = '重新开始本场';
             }
+            function talkNpc() { if (!playing) return; const d = camera.position.distanceTo(npc.position); if (d > 4) return; npcTalking = !npcTalking; $('npc-prompt').textContent = npcTalking ? (secondScene ? '守园人：水城的回声已经等你很久了。' : '守园人：先收回三枚印记，门后的路才会显现。') : '按 G 与守园人交谈'; $('npc-prompt').classList.toggle('visible', npcTalking); }
             const clues = clueData.map((data, index) => createClue(data, index)); let active = 0; let current = null; let playing = false;
 
             function createClue(data, index) {
@@ -163,9 +174,9 @@
                 if (secondScene) location.reload();
                 else location.assign('./huanxiu-night-rain.html?scene=venetian&stage=2');
             };
-            addEventListener('keydown', (event) => { if (event.key.toLowerCase() === 'e') collect(); if (event.key.toLowerCase() === 'f') guide(); });
+            addEventListener('keydown', (event) => { if (event.key.toLowerCase() === 'e') collect(); if (event.key.toLowerCase() === 'f') guide(); if (event.key.toLowerCase() === 'g') talkNpc(); });
             addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-            function animate() { requestAnimationFrame(animate); const t = performance.now() * .001; clues.forEach((clue, i) => { if (clue.visible) { clue.userData.glow.position.y = .35 + Math.sin(t * 2 + i) * .08; clue.userData.ring.rotation.z = t * .45; } }); controls.enabled && controls.update(clock.getDelta()); checkClue(); lcc && LCCRender.update(); renderer.render(scene, camera); }
+            function animate() { requestAnimationFrame(animate); const t = performance.now() * .001; clues.forEach((clue, i) => { if (clue.visible) { clue.userData.glow.position.y = .35 + Math.sin(t * 2 + i) * .08; clue.userData.ring.rotation.z = t * .45; } }); npc.rotation.y = Math.atan2(camera.position.x - npc.position.x, camera.position.z - npc.position.z); const nearNpc = playing && camera.position.distanceTo(npc.position) < 4; if (!nearNpc && npcTalking) { npcTalking = false; $('npc-prompt').classList.remove('visible'); } if (nearNpc && !npcTalking) $('npc-prompt').classList.add('visible'); controls.enabled && controls.update(clock.getDelta()); checkClue(); lcc && LCCRender.update(); renderer.render(scene, camera); }
             animate();
         </script>
     </body>
