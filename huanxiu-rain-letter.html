@@ -569,28 +569,45 @@
       const lanternLight = new THREE.PointLight(0xffb65a, .8, 2.5);
       lanternLight.position.set(-.33, .55, .22); keeper.add(lanternLight);
       scene.add(keeper);
+      // 第一幕叙事角色：坐在躺椅上的老奶奶。
+      const granny = new THREE.Group();
+      granny.position.set(isVenetian ? 1.8 : 1.2, 0.2, isVenetian ? 5.6 : 4.2);
+      const chair = new THREE.Group();
+      const wood = new THREE.MeshStandardMaterial({ color: 0x594436, roughness: .9 });
+      const cushion = new THREE.MeshStandardMaterial({ color: 0x87715d, roughness: 1 });
+      const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(.95,.12,1.25), wood); chairSeat.position.y=.52; chairSeat.rotation.x=-.12; chair.add(chairSeat);
+      const chairBack = new THREE.Mesh(new THREE.BoxGeometry(.95,.12,1.2), wood); chairBack.position.set(0,1.02,-.42); chairBack.rotation.x=-.34; chair.add(chairBack);
+      const chairCushion = new THREE.Mesh(new THREE.BoxGeometry(.76,.1,.95), cushion); chairCushion.position.set(0,.62,.03); chairCushion.rotation.x=-.12; chair.add(chairCushion);
+      [-.36,.36].forEach(x=>{const leg=new THREE.Mesh(new THREE.CylinderGeometry(.035,.045,.58,8),wood);leg.position.set(x,.25,.34);leg.rotation.z=x*.25;chair.add(leg);});
+      granny.add(chair);
+      const grandmaBody = new THREE.Mesh(new THREE.CylinderGeometry(.25,.34,.68,12), new THREE.MeshStandardMaterial({color:0x705b63,roughness:.9})); grandmaBody.position.set(0,.98,.02); grandmaBody.rotation.x=-.25; granny.add(grandmaBody);
+      const grandmaHead = new THREE.Mesh(new THREE.SphereGeometry(.22,14,10), new THREE.MeshStandardMaterial({color:0xd4a07b,roughness:.85})); grandmaHead.position.set(0,1.48,-.18); granny.add(grandmaHead);
+      const grandmaHair = new THREE.Mesh(new THREE.SphereGeometry(.24,12,8), new THREE.MeshStandardMaterial({color:0xb7b5aa,roughness:1})); grandmaHair.scale.set(1,.8,1); grandmaHair.position.set(0,1.63,-.18); granny.add(grandmaHair);
+      const shawl = new THREE.Mesh(new THREE.BoxGeometry(.58,.08,.4), new THREE.MeshStandardMaterial({color:0x9a7f72,roughness:1})); shawl.position.set(0,1.2,-.03); shawl.rotation.x=-.2; granny.add(shawl);
+      scene.add(granny);
+      const grannyLight = new THREE.PointLight(0xffc27a,.55,2.8); grannyLight.position.set(.35,1.1,.25); granny.add(grannyLight);
       const keeperPrompt = document.createElement('button');
       keeperPrompt.type = 'button';
       keeperPrompt.textContent = '守园人在前方 · 按 G 前往';
       keeperPrompt.style.cssText = 'position:fixed;left:50%;bottom:85px;transform:translateX(-50%);z-index:5;padding:10px 18px;color:#ffe0a1;background:#263024;border:1px solid #a79363;cursor:pointer;display:none';
       document.body.append(keeperPrompt);
       function nearKeeper() {
-        return Math.hypot(cam.position.x-keeper.position.x, cam.position.z-keeper.position.z) < 2.8;
+        return Math.hypot(cam.position.x-granny.position.x, cam.position.z-granny.position.z) < 2.8;
       }
       function visitKeeper() {
         if (!play || inspecting || a === items.length) return;
         ready = false;
-        cam.position.set(0, 2, .5);
-        c.lookAt(new THREE.Vector3(0, 1.7, 3));
+        cam.position.set(granny.position.x, 2, granny.position.z - 2.4);
+        c.lookAt(new THREE.Vector3(granny.position.x, 1.2, granny.position.z));
       }
       function talk() {
         if (!play || inspecting || !nearKeeper() || a === items.length) return;
         inspecting = talking = true;
         c.enabled = false;
-        $('note-small').textContent = '廊下 · 守园人';
-        $('note-title').textContent = '雨还没有停';
+        $('note-small').textContent = '廊下 · 老奶奶的故事';
+        $('note-title').textContent = '她还记得那个年轻人';
         $('note-body').textContent = [
-          '你也在找那封信？廊下有一只半湿的信封。按 F 前往，按 E 调查，再把它记入线索板。',
+          '老奶奶轻轻摇着躺椅，说起一个总在雨夜来园的年轻人：他每次都坐在廊下听故事，却从没等到那封信。按 F 前往，按 E 调查，再把它记入线索板。',
           '这字迹，我认得。去看看熄灭的灯吧，灯座下也许还压着旧照片。按 F 前往下一条线索。',
           '照片里的人曾在花窗前等了很久。门前那只未上锁的匣，会告诉你最后的事。按 F 去看看。'
         ][a];
@@ -730,7 +747,8 @@
         const dt = Math.min(clock.getDelta(), .05);
         if (c.enabled) c.update(dt);
         keeperPrompt.style.display = play && !inspecting && a < items.length ? 'block' : 'none';
-        keeperPrompt.textContent = nearKeeper() ? '守园人 · 按 E 对话 / 点击交谈' : '守园人在廊下 · 按 G 前往 / 点击寻路';
+        keeperPrompt.textContent = nearKeeper() ? '老奶奶 · 按 E 听故事 / 点击交谈' : '老奶奶坐在躺椅上 · 按 G 前往';
+        granny.rotation.z = Math.sin(performance.now() * .0012) * .018;
         keeper.rotation.y = Math.atan2(cam.position.x-keeper.position.x, cam.position.z-keeper.position.z);
         head.position.y = 1.6 + Math.sin(performance.now()*.0015)*.012;
         lantern.material.color.setScalar(.85 + Math.sin(performance.now()*.003)*.1).multiply(new THREE.Color(0xffcb72));
