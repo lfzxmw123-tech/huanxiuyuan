@@ -141,6 +141,7 @@
             npc.position.set(secondScene ? 2.5 : -2.5, 0, secondScene ? 8 : 7); scene.add(npc);
             const npcLight = new THREE.PointLight(0xffb45f, 1.2, 4); npcLight.position.set(.42, .9, .08); npc.add(npcLight);
             let npcTalking = false;
+            let npcTaskAccepted = false;
             if (secondScene) {
                 document.querySelector('.masthead h1').textContent = '夜雨寻卷 · 第二场景';
                 document.querySelector('.masthead p').textContent = 'THE VENETIAN · A WALKING TALE';
@@ -153,7 +154,19 @@
                 $('end-text').textContent = '异园的三处回声已经写入卷尾。环秀园与水城的景色在此相接，夜雨寻卷的故事至此完成。';
                 $('restart').textContent = '重新开始本场';
             }
-            function talkNpc() { if (!playing) return; const d = camera.position.distanceTo(npc.position); if (d > 4) return; npcTalking = !npcTalking; $('npc-prompt').textContent = npcTalking ? (secondScene ? '守园人：水城的回声已经等你很久了。' : '守园人：先收回三枚印记，门后的路才会显现。') : '按 G 与守园人交谈'; $('npc-prompt').classList.toggle('visible', npcTalking); }
+            function talkNpc() {
+                if (!playing) return;
+                const d = camera.position.distanceTo(npc.position);
+                if (d > 4) return;
+                if (active >= clueData.length) { $('npc-prompt').textContent = secondScene ? '守园人：卷尾已经合上，故事完成了。' : '守园人：营造图已经归位。'; $('npc-prompt').classList.add('visible'); return; }
+                npcTalking = true;
+                npcTaskAccepted = true;
+                const target = clueData[active];
+                $('npc-prompt').textContent = secondScene ? `守园人：去回廊寻找“${target.title}”。按 F 前往。` : `守园人：去${target.title}，把第 ${active + 1} 枚印记带回来。按 F 前往。`;
+                $('npc-prompt').classList.add('visible');
+                $('quest-title').textContent = `任务：${target.title}`;
+                $('quest-text').textContent = secondScene ? '守园人已标出回廊位置。' : '守园人已标出下一处印记。';
+            }
             const clues = clueData.map((data, index) => createClue(data, index)); let active = 0; let current = null; let playing = false;
 
             function createClue(data, index) {
@@ -174,7 +187,7 @@
                 if (secondScene) location.reload();
                 else location.assign('./huanxiu-night-rain.html?scene=venetian&stage=2');
             };
-            addEventListener('keydown', (event) => { if (event.key.toLowerCase() === 'e') collect(); if (event.key.toLowerCase() === 'f') guide(); if (event.key.toLowerCase() === 'g') talkNpc(); });
+            addEventListener('keydown', (event) => { if (event.key.toLowerCase() === 'e') collect(); if (event.key.toLowerCase() === 'f' && npcTaskAccepted) { guide(); $('npc-prompt').textContent = '已带路到指定位置，靠近发光印记后按 E 记录。'; } if (event.key.toLowerCase() === 'g') talkNpc(); });
             addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
             function animate() { requestAnimationFrame(animate); const t = performance.now() * .001; clues.forEach((clue, i) => { if (clue.visible) { clue.userData.glow.position.y = .35 + Math.sin(t * 2 + i) * .08; clue.userData.ring.rotation.z = t * .45; } }); npc.rotation.y = Math.atan2(camera.position.x - npc.position.x, camera.position.z - npc.position.z); const nearNpc = playing && camera.position.distanceTo(npc.position) < 4; if (!nearNpc && npcTalking) { npcTalking = false; $('npc-prompt').classList.remove('visible'); } if (nearNpc && !npcTalking) $('npc-prompt').classList.add('visible'); controls.enabled && controls.update(clock.getDelta()); checkClue(); lcc && LCCRender.update(); renderer.render(scene, camera); }
             animate();
