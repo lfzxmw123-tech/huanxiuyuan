@@ -330,6 +330,7 @@
         opacity: 1;
         pointer-events: auto;
       }
+      .narrative-remove{display:none!important}
       @media (max-width: 650px) {
         .brand {
           left: 17px;
@@ -361,13 +362,13 @@
           <p>THE LETTER LEFT IN RAIN</p>
         </div>
       </header>
-      <aside class="clues">
+      <aside class="clues narrative-remove">
         <h3>线索板 · <span id="count">0 / 3</span></h3>
         <div class="clue">半湿的信封</div>
         <div class="clue">熄灭的灯</div>
         <div class="clue">未上锁的匣</div>
       </aside>
-      <section class="objective">
+      <section class="objective narrative-remove">
         <small>第一章 · 廊下雨声</small>
         <h2 id="task">雨没有停</h2>
         <p id="desc">看守人说，今晚不该有人来。但廊下有一封被雨打湿的信。</p>
@@ -389,9 +390,7 @@
       <div class="intro">
         <span class="eyebrow">环 秀 园 · 一 封 未 寄 的 信</span>
         <h2>雨夜里，<br />有人没有离开。</h2>
-        <p>
-          你是留守园宅的看守。停电后的廊下出现一封信、一盏熄灯与一只未锁的匣。它们似乎都在等你，替某个人说完未说的话。
-        </p>
+        <p>你回到儿时住过的园宅，雨声把记忆带回廊下。老奶奶还坐在那把旧躺椅上，等你听完一个关于成长、离开与回家的故事。</p>
         <button type="button" class="go" id="start" disabled>场景载入中…</button>
       </div>
     </div>
@@ -400,17 +399,15 @@
         <span class="eyebrow" id="note-small"></span>
         <h2 id="note-title"></h2>
         <p id="note-body"></p>
-          <button type="button" id="next">记入线索板</button>
+          <button type="button" id="next">继续听故事</button>
       </article>
     </div>
     <div id="ending">
       <article class="paper">
         <span class="eyebrow">CHAPTER ONE COMPLETE</span>
-        <h2>信没有寄出。</h2>
-        <p>
-          匣中是一张未完成的画，画着同一条回廊。信的收件人并不在园外——他一直在等待画中人回来。雨还未停，第二章将在花窗前继续。
-        </p>
-          <button type="button" id="restart">进入第二场景</button>
+        <h2>你终于想起了这里。</h2>
+        <p>老奶奶讲完了故事。你想起自己小时候也坐过这把躺椅，在雨声里听她讲园子的名字。那些年你以为自己只是离开了一个地方，原来一直带着它长大。</p>
+          <button type="button" id="restart">再听一遍故事</button>
       </article>
     </div>
     <script type="importmap">
@@ -496,7 +493,7 @@
       c.movementSpeed = 3.1;
       c.lookAt(new THREE.Vector3(0, 2, 1));
       let sceneReady = false, a = 0, play = false, ready = false;
-      let inspecting = false, talking = false;
+      let inspecting = false, talking = false, storyIndex = 0;
       // 固定站位原型：脚底高度沿用当前游戏坐标，不依赖点云碰撞。
       const keeper = new THREE.Group();
       keeper.position.set(isVenetian ? 2.8 : 0, 0.2, isVenetian ? 5.2 : 3.2);
@@ -612,8 +609,8 @@
           '老奶奶轻轻摇着躺椅，讲起一个总在雨夜来园的年轻人。他第一次来时站在廊下，问的不是信在哪里，而是这座园子为什么总替人留一盏灯。那封没有寄出的信，就从这里开始。按 F 前往信封处，按 E 调查。',
           '她说，年轻人后来把一张照片藏进灯罩：照片里，他和一个女孩站在花窗前，约好等雨停后一起离开。可是雨一直没有停，女孩只留下了半句话。按 F 前往熄灭的灯，按 E 调查。',
           '老奶奶最后指向门边那只没有锁的匣。年轻人每次来都把当天听到的故事写进去，等那个人回来再读给她听。多年以后，匣子仍然没有锁，因为故事从来不是要藏起来，而是要等一个愿意继续听的人。按 F 前往未锁的匣，按 E 调查。'
-        ][a];
-        $('next').textContent = '继续调查';
+        ][storyIndex];
+        $('next').textContent = storyIndex < 2 ? '继续听故事' : '故事讲完了';
         $('inspect').classList.add('show');
       }
       keeperPrompt.onclick = () => nearKeeper() ? talk() : visitKeeper();
@@ -695,6 +692,9 @@
         $("intro").remove();
         play = true;
         c.enabled = true;
+        cam.position.set(granny.position.x, 2, granny.position.z - 2.4);
+        c.lookAt(new THREE.Vector3(granny.position.x, 1.2, granny.position.z));
+        setTimeout(() => talk(), 180);
       };
       $("next").onclick = (event) => {
         event.preventDefault();
@@ -704,7 +704,9 @@
         $("inspect").classList.remove("show");
         if (talking) {
           talking = false;
-          c.enabled = true;
+          storyIndex++;
+          if (storyIndex < 3) setTimeout(() => talk(), 260);
+          else { c.enabled = true; setTimeout(() => $('ending').classList.add('show'), 260); }
           return;
         }
         document.querySelectorAll(".clue")[a].classList.add("got");
@@ -718,15 +720,7 @@
         if (a === 3) setTimeout(() => $("ending").classList.add("show"), 250);
         else c.enabled = true;
       };
-      $("restart").onclick = () => {
-        // 第二场景只能在三条线索全部记录后进入。
-        if (a !== 3) return;
-        if (new URLSearchParams(location.search).get("scene") !== "venetian") {
-          location.assign(`${location.pathname}?scene=venetian&stage=2`);
-        } else {
-          location.reload();
-        }
-      };
+      $("restart").onclick = () => location.reload();
       if (new URLSearchParams(location.search).get("scene") === "venetian") {
         $("restart").textContent = "重新开始";
       }
