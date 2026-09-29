@@ -141,7 +141,7 @@
             const npcHead = new THREE.Mesh(new THREE.SphereGeometry(.25,12,8), new THREE.MeshStandardMaterial({color: 0xc58f70, roughness: .85})); npcHead.position.y = 1.45; npc.add(npcHead);
             const npcHat = new THREE.Mesh(new THREE.CylinderGeometry(.34,.42,.12,12), new THREE.MeshStandardMaterial({color: 0x171c18, roughness: 1})); npcHat.position.y = 1.72; npc.add(npcHat);
             const npcLantern = new THREE.Mesh(new THREE.SphereGeometry(.12,8,8), new THREE.MeshBasicMaterial({color: 0xffc56b})); npcLantern.position.set(.42,.8,.08); npc.add(npcLantern);
-            npc.position.set(secondScene ? 2.5 : -2.5, 0, secondScene ? 8 : 7); scene.add(npc);
+            npc.position.set(0, 0, secondScene ? 4.8 : 4.8); scene.add(npc);
             const npcLight = new THREE.PointLight(0xffb45f, 1.2, 4); npcLight.position.set(.42, .9, .08); npc.add(npcLight);
             let npcTalking = false;
             let npcTaskAccepted = false;
