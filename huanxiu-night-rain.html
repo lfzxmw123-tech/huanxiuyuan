@@ -89,7 +89,7 @@
         <div id="loading"><div class="load-copy"><span class="seal">环秀</span><h2>园门将启</h2><p id="loading-text">正在唤醒园中旧影 · 0%</p><div class="load-line"><i id="loading-bar"></i></div></div></div>
         <div id="intro"><div class="chapter"><span class="year">一 场 园 林 的 夜 游</span><h2>雨落环秀，<br>一卷旧图未归。</h2><p>掌灯入园。沿着廊下、花窗与石径留下的微光，收回三枚印记；当最后一页归位，园子会告诉你它原本的名字。</p><button class="enter" id="enter">入园寻卷</button></div></div>
         <div id="dialog"><article class="paper"><span class="eyebrow" id="dialog-index">第一枚印记</span><h3 id="dialog-title"></h3><p id="dialog-text"></p><button id="continue">收进卷中</button></article></div>
-        <div id="end"><article class="paper"><span class="eyebrow">营造图已复</span><h3>园因人静，景为心生。</h3><p>三枚印记归入旧卷。你所走过的并非一条路，而是园林借门、窗、廊与树影写下的一次转折。</p><button id="restart">进入第二场景</button></article></div>
+        <div id="end"><article class="paper"><span class="eyebrow" id="end-label">营造图已复</span><h3 id="end-title">园因人静，景为心生。</h3><p id="end-text">三枚印记归入旧卷。你所走过的并非一条路，而是园林借门、窗、廊与树影写下的一次转折。</p><button id="restart">进入第二场景</button></article></div>
 
         <script type="importmap">{"imports":{"three":"./examples/engine/three/three.module.js","three/addons/":"./examples/engine/three/jsm/"}}</script>
         <script type="module">
@@ -108,7 +108,8 @@
             const clock = new THREE.Clock();
             const transform = new THREE.Matrix4(-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1);
 
-            const scenePath = new URL("./HuanxiuGarden/meta.lcc2", location.href).href;
+            const secondScene = new URLSearchParams(location.search).get('scene') === 'venetian';
+            const scenePath = new URL(secondScene ? './The_Venetian_Resort/The_Venetian_Resort.lcc2' : './HuanxiuGarden/meta.lcc2', location.href).href;
             let lcc;
             try {
                 lcc = LCCRender.load({ camera, scene, dataPath: scenePath, renderLib: THREE, canvas: renderer.domElement, renderer, useEnv: false, usePage: true, useIndexDB: true, useLoadingEffect: false, modelMatrix: transform, appKey: null }, () => { $('loading').classList.add('done'); }, (percent) => { const n = Math.round(percent * 100); $('loading-text').textContent = `正在唤醒园中旧影 · ${n}%`; $('loading-bar').style.width = `${n}%`; }, () => { $('loading-text').textContent = '园影暂时无法载入，请确认通过本地服务器打开此页面。'; $('loading').classList.add('error'); });
@@ -119,11 +120,29 @@
                 $('loading').classList.add('error');
             }
 
-            const clueData = [
+            const firstClues = [
                 { title: '廊下的第一滴雨', body: '雨声落在旧木窗棂上。卷中写道：园不以大取胜，先以一段可停步的廊，留住来者的目光。', pos: [0, 2.05, 6], color: 0xd6b66c },
                 { title: '花窗借来一片天', body: '隔着花窗，近树成远山。园子最擅长的从不是堆砌，而是把有限的眼前，折成无尽的回望。', pos: [-5.5, 2.0, 10.5], color: 0x93b38a },
                 { title: '石径通向无名处', body: '最后一枚印记藏在转折之后。门不只是阻隔；它让下一眼的风景，值得被郑重地抵达。', pos: [5.2, 2.0, 15], color: 0xc58362 }
             ];
+            const secondClues = [
+                { title: '水城的回声', body: '旧卷背面还留着一行淡墨：循水声去。这里的廊道与环秀园不同，雨声却把两处记忆接在了一起。', pos: [0, 2.05, 6], color: 0xd6b66c },
+                { title: '异园的窗影', body: '窗影落在另一座建筑的墙上。你发现画卷缺失的不是景物，而是把两处景物连起来的观看方向。', pos: [-5.5, 2.0, 10.5], color: 0x93b38a },
+                { title: '卷尾的归路', body: '最后一笔终于清晰：从环秀园走到这里，寻找的始终是同一条归路。两处风景在卷尾合成一幅完整的图。', pos: [5.2, 2.0, 15], color: 0xc58362 }
+            ];
+            const clueData = secondScene ? secondClues : firstClues;
+            if (secondScene) {
+                document.querySelector('.masthead h1').textContent = '夜雨寻卷 · 第二场景';
+                document.querySelector('.masthead p').textContent = 'THE VENETIAN · A WALKING TALE';
+                document.querySelector('#intro .year').textContent = '第 二 场 景 · 异 园 回 声';
+                document.querySelector('#intro h2').innerHTML = '旧卷未尽，<br>水城仍有回声。';
+                document.querySelector('#intro p').textContent = '三枚印记让环秀园的营造图复原，卷背却显出另一座建筑的轮廓。沿着回廊继续寻找三处回声，读出画卷最后的归路。';
+                $('enter').textContent = '进入第二场景';
+                $('end-label').textContent = '卷尾已复';
+                $('end-title').textContent = '两处风景，一条归路。';
+                $('end-text').textContent = '异园的三处回声已经写入卷尾。环秀园与水城的景色在此相接，夜雨寻卷的故事至此完成。';
+                $('restart').textContent = '重新开始本场';
+            }
             const clues = clueData.map((data, index) => createClue(data, index)); let active = 0; let current = null; let playing = false;
 
             function createClue(data, index) {
@@ -133,7 +152,7 @@
                 group.userData.glow = glow; group.userData.ring = ring; scene.add(group); return group;
             }
             function makeGlow(color) { const c = document.createElement('canvas'); c.width = c.height = 96; const x = c.getContext('2d'); const g = x.createRadialGradient(48,48,0,48,48,48); const h = '#' + new THREE.Color(color).getHexString(); g.addColorStop(0, '#fff8cd'); g.addColorStop(.16, h); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0,0,96,96); const t = new THREE.CanvasTexture(c); return t; }
-            function updateQuest() { const pct = active / clueData.length * 100; $('progress-bar').style.width = `${pct}%`; if (active === 3) { $('quest-title').textContent = '营造图已复'; $('quest-text').textContent = '旧卷终于归位。'; } else { $('quest-title').textContent = `寻找第 ${active + 1} 枚印记`; $('quest-text').textContent = ['廊下有雨声未尽。', '循花窗的一线微光。', '石径尽头，旧图将归。'][active]; } }
+            function updateQuest() { const pct = active / clueData.length * 100; $('progress-bar').style.width = `${pct}%`; if (active === 3) { $('quest-title').textContent = secondScene ? '卷尾已复' : '营造图已复'; $('quest-text').textContent = secondScene ? '两处风景终于相接。' : '旧卷终于归位。'; } else { $('quest-title').textContent = `寻找第 ${active + 1} 枚${secondScene ? '回声' : '印记'}`; $('quest-text').textContent = (secondScene ? ['循水声寻找第一处回声。', '沿异园的窗影继续前行。', '最后一处回声就在卷尾。'] : ['廊下有雨声未尽。', '循花窗的一线微光。', '石径尽头，旧图将归。'])[active]; } }
             function checkClue() { if (!playing || active >= clues.length) return; const clue = clues[active]; const distance = camera.position.distanceTo(clue.position); const canUse = distance < 3.1; current = canUse ? clue : null; $('crosshair').classList.toggle('active', canUse); $('prompt').classList.toggle('visible', canUse); $('prompt').textContent = canUse ? `按 E 记录 · ${clue.userData.title}` : ''; }
             function collect() { if (!current) return; const data = current.userData; if (data.found) return; data.found = true; current.visible = false; $('dialog-index').textContent = `第 ${active + 1} 枚印记`; $('dialog-title').textContent = data.title; $('dialog-text').textContent = data.body; $('dialog').classList.add('show'); controls.enabled = false; active++; updateQuest(); }
             function guide() { if (!playing || active >= clues.length) return; const clue = clues[active]; camera.position.lerp(new THREE.Vector3(clue.position.x, 2, clue.position.z - 3), .9); camera.lookAt(clue.position); controls.lookAt(clue.position); }
@@ -141,9 +160,9 @@
             $('continue').onclick = () => { $('dialog').classList.remove('show'); if (active === 3) setTimeout(() => $('end').classList.add('show'), 350); else controls.enabled = true; };
             $('restart').onclick = () => {
                 if (active !== 3) return;
-                location.assign('./huanxiu-time-slices.html?scene=venetian&stage=2');
+                if (secondScene) location.reload();
+                else location.assign('./huanxiu-night-rain.html?scene=venetian&stage=2');
             };
-            $('restart').textContent = '进入第二场景';
             addEventListener('keydown', (event) => { if (event.key.toLowerCase() === 'e') collect(); if (event.key.toLowerCase() === 'f') guide(); });
             addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
             function animate() { requestAnimationFrame(animate); const t = performance.now() * .001; clues.forEach((clue, i) => { if (clue.visible) { clue.userData.glow.position.y = .35 + Math.sin(t * 2 + i) * .08; clue.userData.ring.rotation.z = t * .45; } }); controls.enabled && controls.update(clock.getDelta()); checkClue(); lcc && LCCRender.update(); renderer.render(scene, camera); }
