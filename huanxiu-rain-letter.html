@@ -421,6 +421,7 @@
     <script type="module">
       import * as THREE from "three";
       import { FirstPersonControls } from "./examples/engine/three/FirstPersonControls.js";
+      import { GLTFLoader } from "./examples/engine/three/jsm/loaders/GLTFLoader.js";
       import { LCCRender } from "./sdk/lcc-sdk-three.js";
       const $ = (x) => document.getElementById(x),
         items = [
@@ -593,6 +594,20 @@
       const blanket=new THREE.Mesh(new THREE.BoxGeometry(.5,.22,.62),new THREE.MeshStandardMaterial({color:0x776b70,roughness:1})); blanket.position.set(0,.62,.16); blanket.rotation.x=-.16; granny.add(blanket);
       const shawl = new THREE.Mesh(new THREE.BoxGeometry(.64,.1,.46), new THREE.MeshStandardMaterial({color:0xb49a91,roughness:.86})); shawl.position.set(0,1.2,-.03); shawl.rotation.x=-.2; granny.add(shawl);
       scene.add(granny);
+      // 使用外部老奶奶模型替换程序化人物，保留原有躺椅和对话位置。
+      granny.remove(chair);
+      chair.position.copy(granny.position);
+      scene.add(chair);
+      granny.visible = false;
+      let grannyModel = null;
+      new GLTFLoader().load('./the_old_lady.glb', (asset) => {
+        grannyModel = asset.scene;
+        grannyModel.position.copy(granny.position);
+        grannyModel.scale.setScalar(isVenetian ? .78 : .82);
+        grannyModel.rotation.y = Math.PI;
+        grannyModel.traverse((part) => { if (part.isMesh) { part.castShadow = true; part.receiveShadow = true; } });
+        scene.add(grannyModel);
+      }, undefined, (error) => console.warn('老奶奶模型载入失败，将继续使用躺椅占位。', error));
       granny.traverse((part) => { if (part.isMesh) { part.castShadow = true; part.receiveShadow = true; } });
       const grannyLight = new THREE.PointLight(0xffd19a,.9,3.5); grannyLight.position.set(.35,1.25,.3); granny.add(grannyLight);
       const keeperPrompt = document.createElement('button');
@@ -754,7 +769,9 @@
         if (c.enabled) c.update(dt);
         keeperPrompt.style.display = play && !inspecting && a < items.length ? 'block' : 'none';
         keeperPrompt.textContent = nearKeeper() ? '老奶奶 · 按 E 听故事 / 点击交谈' : '老奶奶坐在躺椅上 · 按 G 前往';
-        granny.rotation.y = Math.atan2(cam.position.x - granny.position.x, cam.position.z - granny.position.z);
+        const grannyFacing = Math.atan2(cam.position.x - granny.position.x, cam.position.z - granny.position.z);
+        granny.rotation.y = grannyFacing;
+        if (grannyModel) grannyModel.rotation.y = grannyFacing + Math.PI;
         granny.rotation.z = Math.sin(performance.now() * .0012) * .018;
         keeper.rotation.y = Math.atan2(cam.position.x-keeper.position.x, cam.position.z-keeper.position.z);
         head.position.y = 1.6 + Math.sin(performance.now()*.0015)*.012;
