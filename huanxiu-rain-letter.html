@@ -499,7 +499,7 @@
       let inspecting = false, talking = false;
       // 固定站位原型：脚底高度沿用当前游戏坐标，不依赖点云碰撞。
       const keeper = new THREE.Group();
-      keeper.position.set(0, 0.2, 3);
+      keeper.position.set(isVenetian ? 2.8 : 0, 0.2, isVenetian ? 5.2 : 3.2);
       function bodyPart(geometry, color, x, y, z) {
         const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, roughness: .88 }));
         mesh.position.set(x, y, z);
